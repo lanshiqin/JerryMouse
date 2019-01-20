@@ -1,2 +1,2 @@
 # JerryMouse
-用于记录和控制鼠标键盘设备的杰瑞鼠🐭
+Jerry mouse for recording and controlling mouse and keyboard devices🐭
