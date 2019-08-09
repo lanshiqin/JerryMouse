@@ -83,6 +83,7 @@ class KeyboardActionListener(threading.Thread):
                     # 停止监听
                     startListenerBtn['text'] = '开始录制'
                     startListenerBtn['state'] = 'normal'
+                    MouseActionListener.esc_key = True
                     keyboardListener.stop()
                     return False
                 template = keyboard_action_template()
@@ -131,10 +132,15 @@ class KeyboardActionExecute(threading.Thread):
 
 # 鼠标动作监听
 class MouseActionListener(threading.Thread):
+    esc_key = False
 
     def __init__(self, file_name='mouse.action'):
         super().__init__()
         self.file_name = file_name
+
+    def close_listener(self, listener):
+        if self.esc_key:
+            listener.stop()
 
     def run(self):
         with open(self.file_name, 'w', encoding='utf-8') as file:
@@ -146,6 +152,7 @@ class MouseActionListener(threading.Thread):
                 template['location']['y'] = y
                 file.writelines(json.dumps(template) + "\n")
                 file.flush()
+                self.close_listener(mouseListener)
 
             # 鼠标点击事件
             def on_click(x, y, button, pressed):
@@ -157,6 +164,7 @@ class MouseActionListener(threading.Thread):
                 template['location']['y'] = y
                 file.writelines(json.dumps(template) + "\n")
                 file.flush()
+                self.close_listener(mouseListener)
 
             # 鼠标滚动事件
             def on_scroll(x, y, x_axis, y_axis):
@@ -166,6 +174,7 @@ class MouseActionListener(threading.Thread):
                 template['location']['y'] = y_axis
                 file.writelines(json.dumps(template) + "\n")
                 file.flush()
+                self.close_listener(mouseListener)
 
             with mouse.Listener(on_move=on_move, on_click=on_click, on_scroll=on_scroll) as mouseListener:
                 mouseListener.join()
@@ -206,6 +215,7 @@ class MouseActionExecute(threading.Thread):
                             mouse_exec.scroll(obj['location']['x'], obj['location']['y'])
                             time.sleep(0.01)
                     line = file.readline()
+            self.execute_count = self.execute_count - 1
 
 
 def command_adapter(action):
@@ -223,6 +233,7 @@ def command_adapter(action):
                     'final_text': None
                 }
             ]
+            MouseActionListener.esc_key = False
             UIUpdateCutDownExecute(startTime.get(), custom_thread_list).start()
 
     elif action == 'execute':
@@ -240,13 +251,6 @@ def command_adapter(action):
                 }
             ]
             UIUpdateCutDownExecute(endTime.get(), custom_thread_list).start()
-
-
-def isNumber(content):
-    if content.isdigit() or content == "":
-        return True
-    else:
-        return False
 
 
 if __name__ == '__main__':
