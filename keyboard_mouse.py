@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 import json
 import threading
 import time
@@ -7,6 +9,9 @@ from pynput import keyboard, mouse
 from pynput.keyboard import Controller as KeyBoardController, KeyCode
 from pynput.mouse import Button, Controller as MouseController
 
+root = tkinter.Tk()
+# 屏幕缩放比例
+rate = round(root.winfo_screenwidth()/root.winfo_screenheight(),2)
 
 # 键盘动作模板
 def keyboard_action_template():
@@ -148,8 +153,8 @@ class MouseActionListener(threading.Thread):
             def on_move(x, y):
                 template = mouse_action_template()
                 template['event'] = 'move'
-                template['location']['x'] = x
-                template['location']['y'] = y
+                template['location']['x'] = x/rate
+                template['location']['y'] = y/rate
                 file.writelines(json.dumps(template) + "\n")
                 file.flush()
                 self.close_listener(mouseListener)
@@ -160,8 +165,8 @@ class MouseActionListener(threading.Thread):
                 template['event'] = 'click'
                 template['target'] = button.name
                 template['action'] = pressed
-                template['location']['x'] = x
-                template['location']['y'] = y
+                template['location']['x'] = x/rate
+                template['location']['y'] = y/rate
                 file.writelines(json.dumps(template) + "\n")
                 file.flush()
                 self.close_listener(mouseListener)
@@ -170,8 +175,8 @@ class MouseActionListener(threading.Thread):
             def on_scroll(x, y, x_axis, y_axis):
                 template = mouse_action_template()
                 template['event'] = 'scroll'
-                template['location']['x'] = x_axis
-                template['location']['y'] = y_axis
+                template['location']['x'] = x_axis/rate
+                template['location']['y'] = y_axis/rate
                 file.writelines(json.dumps(template) + "\n")
                 file.flush()
                 self.close_listener(mouseListener)
@@ -254,7 +259,6 @@ def command_adapter(action):
 
 
 if __name__ == '__main__':
-    root = tkinter.Tk()
     root.title('按键精灵-蓝士钦')
     root.geometry('200x200+400+100')
 
